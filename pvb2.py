@@ -9,11 +9,11 @@ import numpy as np
 import json
 
 # Load the intents from a JSON file
-with open('intents.json', 'r') as file:
+with open('intents1.json', 'r') as file:
     intents = json.load(file)['intents']
 
 # Download required NLTK data
-nltk.download('punkt_tab')
+nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('wordnet')
 
@@ -75,6 +75,11 @@ if "conversation" not in st.session_state:
 # Display conversation history when clicked
 if menu_option == "Conversation History":
     st.header("Conversation History")
+    
+    # "Return" button to resume conversation
+    if st.button("Return to Chat"):
+        st.experimental_rerun()  # This will reload the app and return to the chatbot interface
+    
     for message in st.session_state.conversation:
         if message["role"] == "user":
             st.markdown(f"""
