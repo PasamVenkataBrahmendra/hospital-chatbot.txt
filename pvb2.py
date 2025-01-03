@@ -7,15 +7,19 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
 import numpy as np
 import json
+import os
+
+# Download NLTK resources once (only if they are not already downloaded)
+if not os.path.exists(os.path.join(nltk.data.find('tokenizers'), 'punkt')):
+    nltk.download('punkt_tab')
+if not os.path.exists(os.path.join(nltk.data.find('corpora'), 'stopwords')):
+    nltk.download('stopwords')
+if not os.path.exists(os.path.join(nltk.data.find('corpora'), 'wordnet')):
+    nltk.download('wordnet')
 
 # Load intents from JSON file
 with open('intents.json', 'r') as file:
     intents = json.load(file)['intents']
-
-# Download NLTK resources
-nltk.download('punkt_tab')
-nltk.download('stopwords')
-nltk.download('wordnet')
 
 # Initialize components
 lemmatizer = WordNetLemmatizer()
@@ -30,13 +34,19 @@ for intent in intents:
         corpus.append(" ".join(filtered_tokens))
         responses.append(intent['responses'])
 
-# Vectorizer and model
-vectorizer = CountVectorizer()
-X = vectorizer.fit_transform(corpus)
-y = np.arange(len(corpus))
+# Optimize vectorizer and model training by caching
+@st.cache_resource
+def train_model(corpus, responses):
+    vectorizer = CountVectorizer()
+    X = vectorizer.fit_transform(corpus)
+    y = np.arange(len(corpus))
 
-model = MultinomialNB()
-model.fit(X, y)
+    model = MultinomialNB()
+    model.fit(X, y)
+    
+    return vectorizer, model, responses
+
+vectorizer, model, responses = train_model(corpus, responses)
 
 # Chatbot response function
 def chatbot_response(user_input):
