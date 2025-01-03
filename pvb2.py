@@ -43,12 +43,21 @@ model.fit(X, y)
 
 # Function to get chatbot response
 def chatbot_response(user_input):
+    # Tokenize and process the user's input
     user_tokens = word_tokenize(user_input.lower())
     filtered_user_tokens = [lemmatizer.lemmatize(word) for word in user_tokens if word.isalnum() and word not in stop_words]
     user_vector = vectorizer.transform([" ".join(filtered_user_tokens)])
+    
+    # Get the model prediction
     prediction = model.predict(user_vector)
-    predicted_tag = tags[prediction[0]]
-    return np.random.choice(responses[predicted_tag])
+    
+    # Ensure the prediction is within bounds
+    if prediction[0] < len(tags):
+        predicted_tag = tags[prediction[0]]
+        return np.random.choice(responses[predicted_tag])
+    else:
+        # Handle case where prediction is out of bounds (fallback response)
+        return "Sorry, I didn't quite understand that. Can you rephrase?"
 
 # Sidebar with menu options
 st.sidebar.title("Menu")
