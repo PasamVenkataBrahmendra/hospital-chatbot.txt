@@ -8,7 +8,7 @@ from sklearn.naive_bayes import MultinomialNB
 import numpy as np
 import json
 
-with open('intents1.json', 'r') as file:
+with open('intents.json', 'r') as file:
     intents = json.load(file)['intents']
 
 nltk.download('punkt_tab')
