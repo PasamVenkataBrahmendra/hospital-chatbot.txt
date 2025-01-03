@@ -95,18 +95,8 @@ def show_about():
 # Show the selected menu content
 if selection == "Home":
     st.write("### Chat with me!")
-    # User input logic
-    user_input = st.text_input("You:", "", key="input_box", placeholder="Type your message here...")
-
-    if user_input:
-        # Add user message to conversation
-        st.session_state.conversation.append({"role": "user", "text": user_input})
-
-        # Generate chatbot response
-        response = chatbot_response(user_input)
-        st.session_state.conversation.append({"role": "bot", "text": response})
-
-    # Display conversation messages
+    
+    # Display conversation messages with the latest one being at the bottom
     for message in st.session_state.conversation:
         if message["role"] == "user":
             st.markdown(f"""
@@ -120,6 +110,29 @@ if selection == "Home":
                 <b>Chatbot:</b> {message['text']}
             </div>
             """, unsafe_allow_html=True)
+
+    # Input box at the bottom
+    st.markdown("""
+    <style>
+        .css-1q6rg79 {
+            position: fixed;
+            bottom: 10px;
+            left: 10%;
+            width: 80%;
+            z-index: 1000;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    user_input = st.text_input("You:", "", key="input_box", placeholder="Type your message here...")
+
+    if user_input:
+        # Add user message to conversation
+        st.session_state.conversation.append({"role": "user", "text": user_input})
+
+        # Generate chatbot response
+        response = chatbot_response(user_input)
+        st.session_state.conversation.append({"role": "bot", "text": response})
 
 elif selection == "Conversation History":
     show_conversation_history()
