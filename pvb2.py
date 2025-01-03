@@ -46,9 +46,19 @@ def chatbot_response(user_input):
     user_tokens = word_tokenize(user_input.lower())
     filtered_user_tokens = [lemmatizer.lemmatize(word) for word in user_tokens if word.isalnum() and word not in stop_words]
     user_vector = vectorizer.transform([" ".join(filtered_user_tokens)])
+    
     prediction = model.predict(user_vector)
+    
+    # Debugging: print the prediction and tags list
+    print(f"Prediction: {prediction[0]}")
+    print(f"Tags length: {len(tags)}")
+    
+    if prediction[0] >= len(tags) or prediction[0] < 0:
+        return "Sorry, I didn't quite understand that. Can you rephrase?"
+    
     predicted_tag = tags[prediction[0]]
     return np.random.choice(responses[predicted_tag])
+
 
 # Sidebar with menu options
 st.sidebar.title("Menu")
