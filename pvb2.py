@@ -8,6 +8,7 @@ from sklearn.naive_bayes import MultinomialNB
 import numpy as np
 import json
 import os
+import time
 
 # Download NLTK resources once (only if they are not already downloaded)
 if not os.path.exists(os.path.join(nltk.data.find('tokenizers'), 'punkt')):
@@ -140,9 +141,12 @@ if selection == "Home":
         # Add user message to conversation
         st.session_state.conversation.append({"role": "user", "text": user_input})
 
-        # Generate chatbot response
-        response = chatbot_response(user_input)
-        st.session_state.conversation.append({"role": "bot", "text": response})
+        # Add typing simulation delay before the chatbot's response
+        with st.spinner("Chatbot is typing..."):
+            time.sleep(2)  # Simulate typing time
+            # Generate chatbot response
+            response = chatbot_response(user_input)
+            st.session_state.conversation.append({"role": "bot", "text": response})
 
 elif selection == "Conversation History":
     show_conversation_history()
