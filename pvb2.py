@@ -21,15 +21,17 @@ nltk.download('wordnet')
 lemmatizer = WordNetLemmatizer()
 stop_words = set(stopwords.words('english'))
 
-# Prepare the corpus and responses from intents
+# Prepare the corpus, tags, and responses
+tags = []
+responses = {}
 corpus = []
-responses = []
 for intent in intents:
+    tags.append(intent['tag'])  # Store tags
+    responses[intent['tag']] = intent['responses']  # Store responses under each tag
     for pattern in intent['patterns']:
         tokens = word_tokenize(pattern.lower())
         filtered_tokens = [lemmatizer.lemmatize(word) for word in tokens if word.isalnum() and word not in stop_words]
         corpus.append(" ".join(filtered_tokens))
-        responses.append(intent['responses'])
 
 # Vectorizer and classifier setup
 vectorizer = CountVectorizer()
@@ -45,7 +47,8 @@ def chatbot_response(user_input):
     filtered_user_tokens = [lemmatizer.lemmatize(word) for word in user_tokens if word.isalnum() and word not in stop_words]
     user_vector = vectorizer.transform([" ".join(filtered_user_tokens)])
     prediction = model.predict(user_vector)
-    return np.random.choice(responses[prediction[0]])
+    predicted_tag = tags[prediction[0]]
+    return np.random.choice(responses[predicted_tag])
 
 # Sidebar with menu options
 st.sidebar.title("Menu")
@@ -55,7 +58,9 @@ menu_option = st.sidebar.radio("Select an option", ("Conversation History", "Int
 if menu_option == "Conversation History":
     st.sidebar.write("Conversation history will be displayed here.")
 elif menu_option == "Intents Used":
-    st.sidebar.write("List of intents used in the chatbot.")
+    st.sidebar.write("Intents available:")
+    for tag in tags:
+        st.sidebar.write(f"- {tag}")
 elif menu_option == "About":
     st.sidebar.write("This is a Hospital Chatbot built using NLP techniques and Streamlit.")
 
@@ -67,31 +72,49 @@ st.write("Ask me something!")
 if "conversation" not in st.session_state:
     st.session_state.conversation = []
 
+# Display conversation history when clicked
+if menu_option == "Conversation History":
+    st.header("Conversation History")
+    for message in st.session_state.conversation:
+        if message["role"] == "user":
+            st.markdown(f"""
+            <div style='background-color: #e8f5e9; border-radius: 10px; padding: 10px; margin: 10px 0; width: fit-content; max-width: 80%; text-align: left;'>
+                <b>You:</b> {message['text']}
+            </div>
+            """, unsafe_allow_html=True)
+        elif message["role"] == "bot":
+            st.markdown(f"""
+            <div style='background-color: #e3f2fd; border-radius: 10px; padding: 10px; margin: 10px 0; width: fit-content; max-width: 80%; text-align: left; margin-left: auto;'>
+                <b>Chatbot:</b> {message['text']}
+            </div>
+            """, unsafe_allow_html=True)
+
 # User input at the bottom of the page
-user_input = st.text_input("You:", "", key="input_box")
+if menu_option != "Conversation History":
+    user_input = st.text_input("You:", "", key="input_box")
 
-if user_input:
-    # Add user message to conversation
-    st.session_state.conversation.append({"role": "user", "text": user_input})
-    
-    # Generate chatbot response
-    response = chatbot_response(user_input)
-    st.session_state.conversation.append({"role": "bot", "text": response})
+    if user_input:
+        # Add user message to conversation
+        st.session_state.conversation.append({"role": "user", "text": user_input})
 
-# Display conversation with chat bubbles
-for message in st.session_state.conversation:
-    if message["role"] == "user":
-        st.markdown(f"""
-        <div style='background-color: #e8f5e9; border-radius: 10px; padding: 10px; margin: 10px 0; width: fit-content; max-width: 80%; text-align: left;'>
-            <b>You:</b> {message['text']}
-        </div>
-        """, unsafe_allow_html=True)
-    elif message["role"] == "bot":
-        st.markdown(f"""
-        <div style='background-color: #e3f2fd; border-radius: 10px; padding: 10px; margin: 10px 0; width: fit-content; max-width: 80%; text-align: left; margin-left: auto;'>
-            <b>Chatbot:</b> {message['text']}
-        </div>
-        """, unsafe_allow_html=True)
+        # Generate chatbot response
+        response = chatbot_response(user_input)
+        st.session_state.conversation.append({"role": "bot", "text": response})
+
+    # Display conversation with chat bubbles
+    for message in st.session_state.conversation:
+        if message["role"] == "user":
+            st.markdown(f"""
+            <div style='background-color: #e8f5e9; border-radius: 10px; padding: 10px; margin: 10px 0; width: fit-content; max-width: 80%; text-align: left;'>
+                <b>You:</b> {message['text']}
+            </div>
+            """, unsafe_allow_html=True)
+        elif message["role"] == "bot":
+            st.markdown(f"""
+            <div style='background-color: #e3f2fd; border-radius: 10px; padding: 10px; margin: 10px 0; width: fit-content; max-width: 80%; text-align: left; margin-left: auto;'>
+                <b>Chatbot:</b> {message['text']}
+            </div>
+            """, unsafe_allow_html=True)
 
 # Always scroll to the bottom of the conversation
 st.markdown('<script>window.scrollTo(0, document.body.scrollHeight);</script>', unsafe_allow_html=True)
