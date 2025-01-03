@@ -9,11 +9,11 @@ import numpy as np
 import json
 
 # Load the intents from a JSON file
-with open('intents1.json', 'r') as file:
+with open('intents.json', 'r') as file:
     intents = json.load(file)['intents']
 
 # Download required NLTK data
-nltk.download('punkt')
+nltk.download('punkt_tab')
 nltk.download('stopwords')
 nltk.download('wordnet')
 
