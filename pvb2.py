@@ -100,11 +100,9 @@ elif selection == "Intents Used":
 elif selection == "About":
     show_about()
 
-# Add user input box at the bottom
-st.text_input("You:", "", key="input_box", on_change=None)
-
 # User input logic
-user_input = st.session_state.get("input_box", "")
+user_input = st.text_input("You:", "", key="input_box", placeholder="Type your message here...")
+
 if user_input:
     # Add user message to conversation
     st.session_state.conversation.append({"role": "user", "text": user_input})
@@ -127,6 +125,3 @@ for message in st.session_state.conversation:
             <b>Chatbot:</b> {message['text']}
         </div>
         """, unsafe_allow_html=True)
-
-# Ensure input box stays at bottom
-st.text_input("You:", "", key="input_box", placeholder="Type your message here...")
